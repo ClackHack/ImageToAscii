@@ -1,10 +1,13 @@
 '''Works well with high contrast'''
+import os
 import random
+import string
 import time
 import warnings
-import string
 
-from PIL import Image, ImageFont, ImageDraw, ImageStat, ImageEnhance
+import console
+import photos
+from PIL import Image, ImageDraw, ImageEnhance, ImageFont, ImageStat
 
 
 def _getfont(fontsize):
@@ -50,17 +53,15 @@ def gen_charmap(chars=string.printable):
 def resize(im, base=200):
 	# Resize so the smaller image dimension is always 200
 	if im.size[0] > im.size[1]:
-		x = im.size[1]
-		y = im.size[0]
-		a = False
+		y, x = im.size
+		portrait = False
 	else:
-		x = im.size[0]
-		y = im.size[1]
-		a = True
+		x, y = im.size
+		portrait = True
 		
-	percent = (base/float(x))
-	size = int((float(y)*float(percent)))
-	if a:
+	percent = base / float(x)
+	size = int(float(y) * float(percent))
+	if portrait:
 		im = im.resize((base, int(size*0.5)), Image.ANTIALIAS)
 	else:
 		im = im.resize((size, int(base*0.5)), Image.ANTIALIAS)
@@ -116,8 +117,7 @@ def RenderASCII(text, fontsize=200, bgcolor='#EDEDED'):
 	image = Image.new("RGB", (width, height*len(linelist)), bgcolor)
 	draw = ImageDraw.Draw(image)
 	
-	for x in range(len(linelist)):
-		line = linelist[x]
+	for x, line in enumerate(linelist):
 		draw.text((0, x*height), line, (0, 0, 0), font=font)
 	return image
 # 7:80,5:95,4:130,3:195
@@ -126,17 +126,14 @@ vals={'low':[5,95],'med':[4,130],'high':[3,195]}
 
 resolution = 'high'
 font, imsize = vals[resolution]
-import console,time
-console.set_font('Menlo',font)
-import photos,os
-x=photos.capture_image()
+console.set_font('Menlo', font)
+x = photos.capture_image()
 x.save('placeholder.jpg')
-im =Image.open('placeholder.jpg')
-text=image2ASCII(im,imsize,showimage=False)
+im = Image.open('placeholder.jpg')
+text = image2ASCII(im,imsize,showimage=False)
 for i in text:
-	print(i,end='')
+	print(i, end='')
 	time.sleep(0.00001)
-	
 
-console.set_font('Menlo',11)
+console.set_font('Menlo', 11)
 os.remove('placeholder.jpg')
